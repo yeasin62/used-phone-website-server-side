@@ -1,6 +1,6 @@
 const express = require('express');
 const cors = require('cors');
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 require('dotenv').config();
 const port = process.env.PORT || 5000;
 
@@ -18,8 +18,35 @@ console.log(uri);
 const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true, serverApi: ServerApiVersion.v1 });
 
 
+async function run (){
+    try {
+        const phoneCollection = client.db("usedPhoneStore").collection("phoneDetails");
 
+        app.get('/phones', async(req,res)=>{
+            const query = {};
+            const options = await phoneCollection.find(query).toArray();
+            res.send(options);
+        })
 
+        app.get('/phone/:id', async(req,res)=>{
+            const id = req.params.id;
+            const query = {_id: ObjectId(id)};
+            const singlePhone = await phoneCollection.findOne(query);
+            res.send(singlePhone);
+        })
+
+        app.post('/add', async(req,res)=>{
+            const phone = req.body;
+            const result = await phoneCollection.insertOne(phone);
+            res.send(result);
+        })
+    }
+    catch {
+
+    }
+}
+
+run().catch(error=> console.log(error));
 
 app.get('', (req,res)=> {
     res.send('Used product server is running');
