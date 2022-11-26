@@ -14,7 +14,7 @@ app.use(express.json());
 
 
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASSWORD}@cluster0.rvsy5g6.mongodb.net/?retryWrites=true&w=majority`;
-console.log(uri);
+
 const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true, serverApi: ServerApiVersion.v1 });
 
 
@@ -22,6 +22,7 @@ async function run (){
     try {
         const phoneCollection = client.db("usedPhoneStore").collection("phoneDetails");
         const usersCollection = client.db("usedPhoneStore").collection("users");
+        const bookingCollection = client.db("usedPhoneStore").collection("booking");
 
         app.get('/phones', async(req,res)=>{
             const query = {};
@@ -45,6 +46,12 @@ async function run (){
         app.post('/users', async(req,res)=>{
             const users = req.body;
             const result = await usersCollection.insertOne(users);
+            res.send(result);
+        })
+
+        app.post('/booking', async(req,res)=>{
+            const booking = req.body;
+            const result = await bookingCollection.insertOne(booking);
             res.send(result);
         })
     }
