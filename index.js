@@ -79,10 +79,15 @@ async function run (){
             res.send(orders);
         })
 
+        // All sellers api
         app.get('/sellers', async(req,res)=>{
-            // const seller = req.query.sellerAccount;
-            // console.log(seller);
-            const query = {};
+            const query = {sellerAccount: "Seller"};
+            const sellers = await usersCollection.find(query).toArray();
+            res.send(sellers);
+        })
+        // All buyers api
+        app.get('/allbuyers', async(req,res)=>{
+            const query = {sellerAccount: false};
             const sellers = await usersCollection.find(query).toArray();
             res.send(sellers);
         })
@@ -98,7 +103,7 @@ async function run (){
             const query = {userEmail: email};
             const user = await usersCollection.findOne(query);
             if(user){
-                const token = jwt.sign({email},process.env.ACCESS_TOKEN,{expiresIn: '1h'});
+                const token = jwt.sign({email},process.env.ACCESS_TOKEN,{expiresIn: '500h'});
                 res.send({accessToken: token});
             }
             else {
@@ -112,13 +117,30 @@ async function run (){
             res.send(result);
         })
 
+        app.get('/users/admin/:id', async(req,res)=>{
+            const email= req.params.email;
+            const query = {email};
+            const user = await usersCollection.findOne(query);
+            res.send({isAdmin: user?.role === 'admin'})
+        })
+        
+
+
         app.post('/booking', async(req,res)=>{
             const booking = req.body;
             const result = await bookingCollection.insertOne(booking);
             res.send(result);
         })
 
-        app.put('/users/admin/:id', async(req,res)=>{
+        app.put('/users/admin/:id', verifyJWT, async(req,res)=>{
+            const decodedEmail = req.decoded.email;
+            const query = {userEmail: decodedEmail};
+            const user = await usersCollection.findOne(query);
+            console.log(query);
+            // if(user?.role !== 'admin'){
+            //     req.status(403).send({message: 'Forbidden access'})
+            // }
+
             const id = req.params.id;
             const filter = {_id: ObjectId(id)};
             const options = {upsert: true};
