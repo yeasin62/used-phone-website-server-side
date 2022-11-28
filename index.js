@@ -117,6 +117,19 @@ async function run (){
             const result = await bookingCollection.insertOne(booking);
             res.send(result);
         })
+
+        app.put('/users/admin/:id', async(req,res)=>{
+            const id = req.params.id;
+            const filter = {_id: ObjectId(id)};
+            const options = {upsert: true};
+            const updatedDoc = {
+                $set : {
+                    role: 'admin'
+                }
+            }
+            const result = await usersCollection.updateOne(filter,updatedDoc,options);
+            res.send(result);
+        })
     }
     catch {
 
