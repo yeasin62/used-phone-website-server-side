@@ -92,6 +92,13 @@ async function run (){
             res.send(sellers);
         })
 
+        // Advertised api (Display)
+        app.get('/advertisedItems', async(req,res)=>{
+            const query = {isAdvertised: true};
+            const sellers = await phoneCollection.find(query).toArray();
+            res.send(sellers);
+        })
+
         app.post('/add', async(req,res)=>{
             const phone = req.body;
             const result = await phoneCollection.insertOne(phone);
@@ -132,6 +139,7 @@ async function run (){
             res.send(result);
         })
 
+        //admin role api
         app.put('/users/admin/:id', verifyJWT, async(req,res)=>{
             const decodedEmail = req.decoded.email;
             const query = {userEmail: decodedEmail};
@@ -150,6 +158,34 @@ async function run (){
                 }
             }
             const result = await usersCollection.updateOne(filter,updatedDoc,options);
+            res.send(result);
+        })
+
+        //advertise active api (True)
+        app.put('/phones/advertise/:id', verifyJWT, async(req,res)=>{
+            const id = req.params.id;
+            const filter = {_id: ObjectId(id)};
+            const options = {upsert: true};
+            const updatedDoc = {
+                $set : {
+                    isAdvertised: true
+                }
+            }
+            const result = await phoneCollection.updateOne(filter,updatedDoc,options);
+            res.send(result);
+        })
+
+        //advertise active api (false)
+        app.put('/phones/advertised/:id', verifyJWT, async(req,res)=>{
+            const id = req.params.id;
+            const filter = {_id: ObjectId(id)};
+            const options = {upsert: true};
+            const updatedDoc = {
+                $set : {
+                    isAdvertised: false
+                }
+            }
+            const result = await phoneCollection.updateOne(filter,updatedDoc,options);
             res.send(result);
         })
     }
