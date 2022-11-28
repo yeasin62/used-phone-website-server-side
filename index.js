@@ -18,7 +18,21 @@ const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASSWORD}@clu
 
 const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true, serverApi: ServerApiVersion.v1 });
 
-
+function verifyJWT (req,res,next) {
+    console.log('token inside jwt', req.headers.authorization);
+    const authHeader = req.headers.authorization;
+    if(!authHeader){
+        return res.status(401).send('Unauthorized Access');
+    }
+    const token = authHeader.split(' ')[1];
+    jwt.verify(token, process.env.ACCESS_TOKEN, function(error, decoded){
+        if(error){
+            return res.status(403).send({message: 'forbidden Access'});
+        }
+        req.decoded = decoded;
+        next();
+    })
+}
 async function run (){
     try {
         const phoneCollection = client.db("usedPhoneStore").collection("phoneDetails");
@@ -53,17 +67,22 @@ async function run (){
             res.send(singlePhone);
         })
 
-        app.get('/orders', async(req,res)=>{
+        app.get('/orders',verifyJWT, async(req,res)=>{
             const email = req.query.email;
+            //console.log('token', req.headers.authorization);
+            // const decodedEmail = req.decoded.email;
+            // if(email !== decodedEmail){
+            //     return res.status(403).send({message: 'Forbidden access'});
+            // }
             const query = {email: email};
             const orders = await phoneCollection.find(query).toArray();
             res.send(orders);
         })
 
         app.get('/sellers', async(req,res)=>{
-            const seller = req.query.sellerAccount;
-            console.log(seller);
-            const query = {sellerAccount: seller};
+            // const seller = req.query.sellerAccount;
+            // console.log(seller);
+            const query = {};
             const sellers = await usersCollection.find(query).toArray();
             res.send(sellers);
         })
