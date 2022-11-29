@@ -188,6 +188,27 @@ async function run (){
             const result = await phoneCollection.updateOne(filter,updatedDoc,options);
             res.send(result);
         })
+
+        //Verified Seller api
+        app.put('/seller/verified/:id', verifyJWT, async(req,res)=>{
+            const id = req.params.id;
+            const filter = {_id: ObjectId(id)};
+            const options = {upsert: true};
+            const updatedDoc = {
+                $set : {
+                    isVerifiedSeller: true
+                }
+            }
+            const result = await usersCollection.updateOne(filter,updatedDoc,options);
+            res.send(result);
+        })
+
+        app.delete('/seller/:id', async(req,res)=> {
+            const id = req.params.id;
+            const filter = {_id: ObjectId(id)};
+            const result = await usersCollection.deleteOne(filter) ;
+            res.send(result);
+        })
     }
     catch {
 
