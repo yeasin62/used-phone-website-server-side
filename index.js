@@ -66,17 +66,20 @@ async function run (){
             const singlePhone = await phoneCollection.findOne(query);
             res.send(singlePhone);
         })
-
+        //my products api
         app.get('/orders',verifyJWT, async(req,res)=>{
             const email = req.query.email;
-            //console.log('token', req.headers.authorization);
-            // const decodedEmail = req.decoded.email;
-            // if(email !== decodedEmail){
-            //     return res.status(403).send({message: 'Forbidden access'});
-            // }
             const query = {email: email};
             const orders = await phoneCollection.find(query).toArray();
             res.send(orders);
+        })
+
+        // my booking api 
+        app.get('/booking', async(req,res)=>{
+            const email = req.query.email;
+            const query = {buyerEmail: email};
+            const bookings = await bookingCollection.find(query).toArray();
+            res.send(bookings);
         })
 
         // All sellers api
@@ -203,10 +206,26 @@ async function run (){
             res.send(result);
         })
 
+        //seller delete api
         app.delete('/seller/:id', async(req,res)=> {
             const id = req.params.id;
             const filter = {_id: ObjectId(id)};
             const result = await usersCollection.deleteOne(filter) ;
+            res.send(result);
+        })
+        //seller delete api
+        app.delete('/buyer/:id', async(req,res)=> {
+            const id = req.params.id;
+            const filter = {_id: ObjectId(id)};
+            const result = await usersCollection.deleteOne(filter) ;
+            res.send(result);
+        })
+
+        //product delete api
+        app.delete('/phone/:id', async(req,res)=> {
+            const id = req.params.id;
+            const filter = {_id: ObjectId(id)};
+            const result = await phoneCollection.deleteOne(filter) ;
             res.send(result);
         })
     }
